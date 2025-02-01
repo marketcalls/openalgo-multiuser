@@ -58,7 +58,7 @@ OpenAlgo-Multi User is an open-source Python FastAPI application designed to bri
 - **Containerization**: Docker
 
 ## 📝 Important Note
-This is NOT a copy trading platform. It's designed for individual traders to automate and enhance their trading strategies across multiple platforms.
+This is NOT a copy trading platform. It's designed for individual traders, business, research analysts, Research investment advisors  to provide a full stack hostable solution
 
 ## 🏗 Project Structure
 ```
