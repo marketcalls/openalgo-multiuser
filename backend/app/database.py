@@ -1,42 +1,17 @@
 from tortoise import Tortoise
-import os
-from dotenv import load_dotenv
 import logging
+from .config import settings
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-load_dotenv()
-
-# Database configuration
-DB_CONFIG = {
-    'user': os.getenv("POSTGRES_USER", "postgres"),
-    'password': os.getenv("POSTGRES_PASSWORD", "1111"),
-    'host': os.getenv("POSTGRES_SERVER", "localhost"),
-    'port': os.getenv("POSTGRES_PORT", "5432"),
-    'database': os.getenv("POSTGRES_DB", "openalgo_db")
-}
-
-# Build connection string for Tortoise
-DATABASE_URL = f"postgres://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
-
-TORTOISE_ORM = {
-    "connections": {"default": DATABASE_URL},
-    "apps": {
-        "models": {
-            "models": ["app.models", "aerich.models"],
-            "default_connection": "default",
-        },
-    },
-}
 
 async def init_db():
     """Initialize database connection"""
     try:
         logger.info("Initializing database connection...")
         await Tortoise.init(
-            config=TORTOISE_ORM,
+            config=settings.TORTOISE_ORM,
             use_tz=True
         )
         logger.info("Generating database schemas...")
