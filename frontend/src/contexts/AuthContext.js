@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { setupAutoLogout } from '../utils/autoLogout';
 
 const AuthContext = createContext(null);
 
@@ -15,6 +16,20 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
+  // Setup auto-logout when user is logged in
+  useEffect(() => {
+    if (user) {
+      const cleanup = setupAutoLogout(() => {
+        logout();
+        // Optionally show a notification to the user
+        alert('Your session has been automatically logged out at 3:30 AM IST.');
+      });
+      
+      // Cleanup when component unmounts or user logs out
+      return cleanup;
+    }
+  }, [user]);
 
   const fetchUserProfile = async (token) => {
     try {
@@ -56,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

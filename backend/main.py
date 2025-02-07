@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth
 from app.database import init_db, close_db
+from utils.auto_logout import init_auto_logout
 import logging
 
 # Set up logging
@@ -28,6 +29,7 @@ app.add_middleware(
 async def startup_event():
     logger.info("Starting application...")
     await init_db()
+    init_auto_logout(app)
     logger.info("Application startup complete!")
 
 @app.on_event("shutdown")

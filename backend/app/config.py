@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
+    # Auto-logout Configuration
+    AUTO_LOGOUT_TIME: str = os.getenv("AUTO_LOGOUT_TIME", "03:30")
+    AUTO_LOGOUT_TIMEZONE: str = os.getenv("AUTO_LOGOUT_TIMEZONE", "Asia/Kolkata")
+
     # Database URL
     @property
     def DATABASE_URL(self) -> str:
