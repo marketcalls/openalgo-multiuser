@@ -29,6 +29,8 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
       - AUTO_LOGOUT_TIME=${AUTO_LOGOUT_TIME}
       - AUTO_LOGOUT_TIMEZONE=${AUTO_LOGOUT_TIMEZONE}
+    volumes:
+      - app_logs:/app/logs
     ports:
       - "8000:8000"
     depends_on:
@@ -44,3 +46,4 @@ services:
 
 volumes:
   postgres_data:
+  app_logs:

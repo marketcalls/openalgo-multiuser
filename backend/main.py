@@ -3,11 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth
 from app.database import init_db, close_db
 from utils.auto_logout import init_auto_logout
-import logging
+from app.logging_config import setup_logging
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 app = FastAPI(
     title="OpenAlgo MultiUser API",
