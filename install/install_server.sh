@@ -74,24 +74,52 @@ fi
 
 # Step 2: Clone or Update Repository
 print_message "Setting up repository..."
-cd /opt
 
-if [ -d "openalgo-multiuser/.git" ]; then
-    print_message "Repository exists, updating..."
-    cd openalgo-multiuser
-    # Stash any local changes
-    git stash -u || true
-    # Fetch and reset to latest version
-    git fetch origin
-    git reset --hard origin/master
-    git clean -fd
-else
-    print_message "Cloning repository..."
-    # If directory exists but not a git repo, remove it
-    [ -d "openalgo-multiuser" ] && rm -rf openalgo-multiuser
-    git clone https://github.com/marketcalls/openalgo-multiuser.git
-    cd openalgo-multiuser
-fi
+# Ensure we're in /opt directory
+cd /opt || {
+    print_message "Failed to change to /opt directory"
+    exit 1
+}
+
+# Function to handle repository setup
+setup_repository() {
+    local repo_path="/opt/openalgo-multiuser"
+    
+    # If directory exists but is not a git repo
+    if [ -d "$repo_path" ] && [ ! -d "$repo_path/.git" ]; then
+        print_message "Removing existing non-git directory..."
+        rm -rf "$repo_path"
+    fi
+
+    # If git repository exists
+    if [ -d "$repo_path/.git" ]; then
+        print_message "Repository exists, updating..."
+        cd "$repo_path" || exit 1
+        
+        # Reset any changes and update
+        git fetch origin || {
+            print_message "Failed to fetch updates. Removing and cloning fresh..."
+            cd /opt
+            rm -rf "$repo_path"
+            git clone https://github.com/marketcalls/openalgo-multiuser.git
+        }
+        
+        git reset --hard origin/master
+        git clean -fd
+    else
+        print_message "Cloning fresh repository..."
+        git clone https://github.com/marketcalls/openalgo-multiuser.git
+    fi
+
+    # Ensure we're in the repository directory
+    cd "$repo_path" || {
+        print_message "Failed to change to repository directory"
+        exit 1
+    }
+}
+
+# Execute repository setup
+setup_repository
 
 # Step 3: Configure Environment Variables
 if [ ! -f ".env" ]; then
