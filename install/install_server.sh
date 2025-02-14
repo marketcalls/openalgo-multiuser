@@ -146,10 +146,18 @@ fi
 # Configure Nginx
 print_message "Configuring Nginx for $DOMAIN_NAME..."
 
-# Remove existing symlink if it exists
-if [ -L "/etc/nginx/sites-enabled/openalgo" ]; then
+# Function to clean nginx configs
+clean_nginx_configs() {
+    print_message "Cleaning up nginx configurations..."
+    rm -f /etc/nginx/sites-enabled/default
     rm -f /etc/nginx/sites-enabled/openalgo
-fi
+    rm -f /etc/nginx/sites-available/openalgo
+    # Remove any broken symlinks
+    find /etc/nginx/sites-enabled/ -type l ! -exec test -e {} \; -delete
+}
+
+# Clean existing configs
+clean_nginx_configs
 
 # Create/Update Nginx configuration
 cat > /etc/nginx/sites-available/openalgo << EOL
@@ -190,7 +198,13 @@ server {
 EOL
 
 # Create symlink and verify configuration
-ln -sf /etc/nginx/sites-available/openalgo /etc/nginx/sites-enabled/
+print_message "Creating nginx symlink..."
+ln -sf /etc/nginx/sites-available/openalgo /etc/nginx/sites-enabled/openalgo
+if [ ! -L "/etc/nginx/sites-enabled/openalgo" ] || [ ! -f "/etc/nginx/sites-available/openalgo" ]; then
+    print_message "Failed to create nginx symlink. Cleaning up..."
+    clean_nginx_configs
+    exit 1
+fi
 
 # Test nginx configuration
 nginx -t || {
