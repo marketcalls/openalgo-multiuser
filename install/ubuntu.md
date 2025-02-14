@@ -9,35 +9,24 @@ Before you begin, ensure you have:
 1. A fresh Ubuntu server (20.04 or later)
 2. Root or sudo access to the server
 3. A domain name pointed to your server's IP address (via DNS A record)
-4. Git installed on your server
+4. `curl` installed on your server (usually pre-installed on Ubuntu)
 
 ## Installation Steps
 
-### 1. Install Git (if not installed)
+### 1. Download and Run the Installation Script
 
 ```bash
-sudo apt update
-sudo apt install git -y
-```
 
-### 2. Clone the Repository
+# Download the installation script
+curl -O https://raw.githubusercontent.com/marketcalls/openalgo-multiuser/master/install/install_server.sh
 
-```bash
-cd /opt
-sudo git clone https://github.com/marketcalls/openalgo-multiuser.git
-cd openalgo-multiuser
-```
+# Make the script executable
+sudo chmod +x install_server.sh
 
-### 3. Make the Installation Script Executable
+# Run the installation script
 
 ```bash
-sudo chmod +x install/install_server.sh
-```
-
-### 4. Run the Installation Script
-
-```bash
-sudo ./install/install_server.sh
+sudo ./install_server.sh
 ```
 
 During the installation:
