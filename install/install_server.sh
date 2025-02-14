@@ -76,13 +76,19 @@ fi
 print_message "Setting up repository..."
 cd /opt
 
-if [ -d "openalgo-multiuser" ]; then
+if [ -d "openalgo-multiuser/.git" ]; then
     print_message "Repository exists, updating..."
     cd openalgo-multiuser
-    git fetch
+    # Stash any local changes
+    git stash -u || true
+    # Fetch and reset to latest version
+    git fetch origin
     git reset --hard origin/master
+    git clean -fd
 else
     print_message "Cloning repository..."
+    # If directory exists but not a git repo, remove it
+    [ -d "openalgo-multiuser" ] && rm -rf openalgo-multiuser
     git clone https://github.com/marketcalls/openalgo-multiuser.git
     cd openalgo-multiuser
 fi
