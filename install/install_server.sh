@@ -143,11 +143,28 @@ if ! is_installed nginx; then
     apt install -y nginx
 fi
 
+# Configure Nginx
+print_message "Configuring Nginx for $DOMAIN_NAME..."
+
+# Remove existing symlink if it exists
+if [ -L "/etc/nginx/sites-enabled/openalgo" ]; then
+    rm -f /etc/nginx/sites-enabled/openalgo
+fi
+
 # Create/Update Nginx configuration
 cat > /etc/nginx/sites-available/openalgo << EOL
 server {
     listen 80;
     server_name $DOMAIN_NAME;
+
+    # Larger upload size for API
+    client_max_body_size 50M;
+
+    # Better timeouts for long-running requests
+    proxy_connect_timeout 60;
+    proxy_send_timeout 60;
+    proxy_read_timeout 60;
+    send_timeout 60;
 
     location /api/ {
         proxy_pass http://127.0.0.1:8000/;
@@ -155,6 +172,11 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
     }
 
     location / {
@@ -167,10 +189,22 @@ server {
 }
 EOL
 
-# Enable Nginx configuration
-ln -s /etc/nginx/sites-available/openalgo /etc/nginx/sites-enabled/
-nginx -t
-systemctl restart nginx
+# Create symlink and verify configuration
+ln -sf /etc/nginx/sites-available/openalgo /etc/nginx/sites-enabled/
+
+# Test nginx configuration
+nginx -t || {
+    print_message "Nginx configuration test failed. Rolling back..."
+    rm -f /etc/nginx/sites-enabled/openalgo
+    exit 1
+}
+
+# Restart nginx
+systemctl restart nginx || {
+    print_message "Failed to restart Nginx. Rolling back..."
+    rm -f /etc/nginx/sites-enabled/openalgo
+    exit 1
+}
 
 # Step 6: Configure UFW Firewall
 print_message "Checking and configuring UFW Firewall..."
