@@ -89,19 +89,31 @@ ln -s /etc/nginx/sites-available/openalgo /etc/nginx/sites-enabled/
 nginx -t
 systemctl restart nginx
 
-# Step 6: Install Certbot and get SSL certificate
-print_message "Installing Certbot..."
+# Step 6: Configure UFW Firewall
+print_message "Configuring UFW Firewall..."
+apt install -y ufw
+ufw --force enable
+ufw allow 22/tcp    # SSH
+ufw allow 80/tcp    # HTTP
+ufw allow 443/tcp   # HTTPS
+ufw status
+
+# Step 7: Install Certbot and get SSL certificate
+print_message "Installing and configuring Certbot..."
 apt install -y certbot python3-certbot-nginx
 
-print_message "Please run the following command manually to configure SSL:"
-echo "sudo certbot --nginx -d $DOMAIN_NAME"
+print_message "Obtaining SSL certificate for $DOMAIN_NAME..."
+certbot --nginx -d "$DOMAIN_NAME" --non-interactive --agree-tos --email "admin@$DOMAIN_NAME" --redirect
 
-# Step 7: Set up auto-start on reboot
+# Step 8: Set up auto-start on reboot
 print_message "Setting up auto-start on reboot..."
 (crontab -l 2>/dev/null; echo "@reboot sleep 10 && cd /opt/openalgo-multiuser && docker-compose up -d") | crontab -
 
 print_message "Installation complete! Please:"
-echo "1. Update the domain name in /etc/nginx/sites-available/openalgo"
-echo "2. Run: sudo certbot --nginx -d $DOMAIN_NAME"
-echo "3. Update the .env file with secure credentials"
-echo "4. Reboot to verify everything starts correctly: sudo reboot"
+echo "1. Update the .env file with secure credentials"
+echo "2. Reboot to verify everything starts correctly: sudo reboot"
+echo "
+Your OpenAlgo instance should now be accessible at:
+https://$DOMAIN_NAME (Frontend)
+https://$DOMAIN_NAME/api/docs (API Documentation)
+"
