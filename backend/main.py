@@ -1,9 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth
 from app.database import init_db, close_db
 from utils.auto_logout import init_auto_logout
 from app.logging_config import setup_logging
+import os
+import secrets
+from fastapi.security import HTTPBearer
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.responses import JSONResponse
 
 # Set up logging
 logger = setup_logging()
@@ -14,13 +19,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS
+# Add CORS middleware first
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Modify this in production
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Register startup and shutdown events
